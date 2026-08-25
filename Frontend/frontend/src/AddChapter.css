@@ -1,0 +1,136 @@
+/* คอนเทนเนอร์หลักของหน้าเพิ่มตอน */
+.add-chapter-container {
+  max-width: 600px;
+  margin: 40px auto;
+  background-color: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 30px;
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* หัวข้อหน้า */
+.add-chapter-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 24px;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* จัดกลุ่มฟอร์มแต่ละบรรทัด */
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ป้ายข้อความหัวข้อฟอร์ม */
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #d1d5db;
+}
+
+/* ช่องกรอกข้อมูลทั่วไป */
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box; /* ป้องกันไม่ให้ padding ดันให้กล่องเกินขนาด */
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: #3b82f6;
+}
+
+/* ปรับแต่งช่องเลือกไฟล์ (Input File) ให้เต็มกรอบและกลมกลืน */
+.form-input[type="file"] {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* ปรับแต่งปุ่มเลือกไฟล์ของเบราว์เซอร์ */
+.form-input[type="file"]::file-selector-button {
+  background-color: #374151;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 12px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.form-input[type="file"]::file-selector-button:hover {
+  background-color: #4b5563;
+}
+
+/* ปุ่มกดบันทึกหลัก */
+.submit-btn {
+  width: 100%;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.submit-btn:disabled {
+  background-color: #4b5563;
+  cursor: not-allowed;
+}
+
+/* กล่องแสดงรายชื่อไฟล์ที่เลือก */
+.file-preview-list {
+  margin-top: 10px;
+  background-color: #1f2937;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+}
+
+.file-count {
+  font-weight: bold;
+  color: #10b981;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.file-list li {
+  padding: 4px 0;
+  border-bottom: 1px solid #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

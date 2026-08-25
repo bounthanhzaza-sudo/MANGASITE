@@ -1,0 +1,24 @@
+.floating-gif-container {
+  position: fixed;
+  z-index: 9999;
+  cursor: grab; /* เปลี่ยนเป็นรูปมือพร้อมลาก */
+  user-select: none; /* ป้องกันการคลุมดำรูปตอนลาก */
+  transition: transform 0.2s ease;
+}
+
+.floating-gif-container:active {
+  cursor: grabbing; /* เปลี่ยนเป็นรูปมือตอนกำลังลาก */
+}
+
+.floating-gif-image {
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none; /* สำคัญ: ป้องกันไม่ให้เมาส์โฟกัสที่ตัวรูปขณะลาก */
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+}
+
+/* เอฟเฟกต์ตอน Hover เฉพาะตอนที่ไม่ได้ลาก */
+.floating-gif-container:hover {
+  transform: scale(1.1);
+}
