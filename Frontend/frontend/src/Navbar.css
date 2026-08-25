@@ -187,3 +187,55 @@ html.dark .search-item span {
 html:not(.dark) .search-item span {
   color: #1e293b;
 }
+/* สไตล์สำหรับปุ่ม Login และ Logout ใน Navbar */
+.auth-action-btn {
+  height: 2.5rem; /* เทียบเท่า h-10 */
+  display: flex;
+  align-items: center;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-radius: 0.5rem; /* rounded-lg */
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  border-width: 1px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+}
+
+/* ปุ่ม Login (เปลี่ยนสีตามโหมดมืด/สว่างอัตโนมัติจาก HTML class="dark") */
+html:not(.dark) .login-action-btn {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border-color: #d1d5db;
+}
+html:not(.dark) .login-action-btn:hover {
+  background-color: #e5e7eb;
+}
+
+html.dark .login-action-btn {
+  background-color: #15253d;
+  color: #e2e8f0;
+  border-color: #2c4a75;
+}
+html.dark .login-action-btn:hover {
+  background-color: #2c4a75;
+}
+
+/* ปุ่ม Logout */
+html:not(.dark) .logout-btn {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #000000;
+}
+html:not(.dark) .logout-btn:hover {
+  background-color: #fee2e2;
+}
+
+html.dark .logout-btn {
+  background-color: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+html.dark .logout-btn:hover {
+  background-color: rgba(220, 38, 38, 0.25);
+}

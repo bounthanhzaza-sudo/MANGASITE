@@ -3,15 +3,31 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, Sun, Moon, Bookmark, BookOpen } from 'lucide-react';
 import './Navbar.css';
 
-const Navbar = ({ isDarkMode, setIsDarkMode }) => {
+const Navbar = ({ isDarkMode, setIsDarkMode, isLoggedIn, setIsLoggedIn }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
 
+  // ตรวจสอบสถานะ Admin จาก localStorage
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+  const currentUser = localStorage.getItem('currentUser');
+
   const toggleTheme = () => {
     setIsDarkMode((prev) => !prev);
+  };
+
+  // ฟังก์ชันจัดการออกจากระบบ (Logout)
+  const handleLogout = () => {
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('currentUser');
+    if (setIsLoggedIn) {
+      setIsLoggedIn(false);
+    }
+    alert('ออกจากระบบสำเร็จ');
+    navigate('/login');
+    window.location.reload(); // รีเฟรชหน้าจอเพื่อให้ Navbar อัปเดตสถานะทันที
   };
 
   useEffect(() => {
@@ -72,13 +88,17 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
             <Bookmark className="inline-block mr-2 text-purple-400" size={16} />
             Book Mark
           </Link>
-          <Link to="/add-manga" className="nav-btn h-10 flex items-center px-4 rounded-lg font-medium shadow-sm">
-            + Add New Manga
-          </Link>
+          
+          {isAdmin && (
+            <Link to="/add-manga" className="nav-btn h-10 flex items-center px-4 rounded-lg font-medium shadow-sm">
+              + Add New Manga
+            </Link>
+          )}
         </div>
       </div>
       
-      <div className="nav-right" ref={searchRef}>
+      {/* ฝั่งขวาของ Navbar */}
+      <div className="nav-right flex items-center gap-3" ref={searchRef}>
         <div className="search-container">
           <Search className="search-icon" size={16} />
           <input
@@ -124,7 +144,18 @@ const Navbar = ({ isDarkMode, setIsDarkMode }) => {
           )}
         </div>
 
-        {/* ปุ่มสลับโหมด: หากเป็น Dark mode ให้แสดงไอคอนพระจันทร์ เพื่อกดเปลี่ยนเป็นโหมดสว่าง */}
+        {/* ปุ่ม Login / Logout (อัปเดตให้รองรับ Google Login และ currentUser) */}
+        {isLoggedIn || isAdmin || currentUser ? (
+          <button onClick={handleLogout} className="auth-action-btn logout-btn cursor-pointer">
+            Logout
+          </button>
+        ) : (
+          <Link to="/login" className="auth-action-btn login-action-btn">
+            Login
+          </Link>
+        )}
+
+        {/* ปุ่มสลับโหมด Dark/Light */}
         <button 
           onClick={toggleTheme}
           className={`theme-btn ${isDarkMode ? 'bg-[#15253d] text-slate-300 border-[#2c4a75] hover:bg-[#2c4a75]' : 'bg-gray-100 text-yellow-500 border-gray-300 hover:bg-gray-200'}`}

@@ -9,14 +9,19 @@ import MangaDetail from './MangaDetail';
 import AddChapter from "./AddChapter";
 import ReadManga from './ReadManga';
 import MangaFilter from './MangaFilter';
-import FloatingGif from './FloatingGif'; // นำเข้า FloatingGif
-import VideoModalButton from './VideoModalButton'; // นำเข้า VideoModalButton (ปรับ Path ตามที่เก็บไฟล์จริง เช่น './components/VideoModalButton')
+import FloatingGif from './FloatingGif'; 
+import VideoModalButton from './VideoModalButton'; 
+import Login from './Login'; 
+import Signin from './Sighin'; 
 
 const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme ? savedTheme === 'dark' : true;
   });
+
+  // เพิ่ม State สำหรับเก็บสถานะการเข้าสู่ระบบ
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -28,9 +33,28 @@ const App = () => {
     }
   }, [isDarkMode]);
 
+  // ตรวจสอบสถานะ Login จาก localStorage เมื่อโหลดแอปครั้งแรก
+  useEffect(() => {
+    const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(loggedInStatus);
+  }, []);
+
+  // ฟังก์ชันสำหรับกด Logout
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    setIsLoggedIn(false);
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`} style={isDarkMode ? { backgroundImage: 'linear-gradient(to bottom, #111e38, #0a1128)' } : { backgroundColor: '#ffffff' }}>
-      <Navbar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+      
+      {/* ส่งสถานะ isLoggedIn และฟังก์ชัน handleLogout ไปให้ Navbar */}
+      <Navbar 
+        isDarkMode={isDarkMode} 
+        setIsDarkMode={setIsDarkMode} 
+        isLoggedIn={isLoggedIn} 
+        onLogout={handleLogout} 
+      />
  
       <div className="mx-auto max-w-7xl px-4 py-6">
         <Routes>
@@ -50,10 +74,13 @@ const App = () => {
           <Route path="/BookFav" element={<div className="py-6"><BookFav /></div>} />
           <Route path="/manga/:id/add-chapter" element={<AddChapter />} />
           <Route path="/read/:chapterId" element={<ReadManga />} />
+          
+          {/* ส่ง setIsLoggedIn ไปให้หน้า Login เพื่ออัปเดตสถานะเมื่อล็อกอินสำเร็จ */}
+          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+          <Route path="/signin" element={<Signin />} />
         </Routes>
       </div>
 
-      {/* เรียกใช้งาน FloatingGif และปุ่ม Video Modal ไว้ล่างสุดเพื่อให้แสดงทุกหน้า */}
       <FloatingGif />
       <VideoModalButton />
     </div>

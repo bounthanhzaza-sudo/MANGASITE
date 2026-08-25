@@ -11,6 +11,9 @@ const MangaDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
 
+  // ตรวจสอบสถานะ Admin จาก localStorage
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
   const fetchMangaDetail = async () => {
     try {
       setLoading(true);
@@ -217,13 +220,15 @@ const MangaDetail = () => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="chapter-section-title m-0">Chapter List</h2>
               
-              {/* ปุ่มเพิ่มตอนใหม่ */}
-              <Link 
-                to={`/manga/${id}/add-chapter`} 
-                className="add-chapter-btn"
-              >
-                <Plus size={16} /> Add Chapter
-              </Link>
+              {/* ปุ่มเพิ่มตอนใหม่ (แสดงเฉพาะ Admin) */}
+              {isAdmin && (
+                <Link 
+                  to={`/manga/${id}/add-chapter`} 
+                  className="add-chapter-btn flex items-center gap-1"
+                >
+                  <Plus size={16} /> Add Chapter
+                </Link>
+              )}
             </div>
             
             <div className="chapter-list-container">
@@ -236,20 +241,22 @@ const MangaDetail = () => {
                       <span>{chap.title}</span>
                     </Link>
 
-                    {/* ฝั่งขวา: วันที่ และปุ่มลบ */}
+                    {/* ฝั่งขวา: วันที่ และปุ่มลบ (ปุ่มลบแสดงเฉพาะ Admin) */}
                     <div className="flex items-center gap-4">
                       <span className="chapter-date">{chap.date}</span>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDeleteChapter(chap.id);
-                        }}
-                        className="text-red-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1 transition"
-                        title="ลบตอนนี้"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDeleteChapter(chap.id);
+                          }}
+                          className="text-red-400 hover:text-red-600 bg-transparent border-none cursor-pointer p-1 transition"
+                          title="ลบตอนนี้"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))
