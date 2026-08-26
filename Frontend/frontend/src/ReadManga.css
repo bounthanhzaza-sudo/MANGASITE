@@ -37,12 +37,25 @@
   border-radius: 9999px;
   font-size: 14px;
   text-decoration: none;
+  border: none;
+  cursor: pointer;
   transition: all 0.2s;
 }
 
-.reader-back-btn:hover {
+.reader-back-btn:hover:not(:disabled) {
   color: #ffffff;
   background-color: #334155;
+}
+
+.reader-back-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.reader-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .chapter-title-display {
@@ -64,7 +77,7 @@
   background-color: #374151;
 }
 
-/* พื้นที่แสดงรูปภาพหน้ามังงะ (ปรับแก้: เอา gap ออกเพื่อให้ภาพต่อกันสนิท) */
+/* พื้นที่แสดงรูปภาพหน้ามังงะ (เอา gap ออกเพื่อให้ภาพต่อกันสนิท) */
 .reader-pages-wrapper {
   width: 100%;
   display: flex;
@@ -81,6 +94,62 @@
   margin: 0;             /* ลบช่องว่างรอบรูป */
   padding: 0;
   border: none;
+}
+
+/* --- ส่วนปุ่มเปลี่ยนตอนด้านล่างสุด (Bottom Navigation) --- */
+.reader-bottom-nav {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 16px;
+  margin-top: 16px;
+  gap: 12px;
+}
+
+.reader-nav-btn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  background-color: #1e293b;
+  color: #f1f5f9;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reader-nav-btn:hover:not(:disabled) {
+  background-color: #334155;
+  border-color: #475569;
+  color: #ffffff;
+}
+
+/* ปุ่มตอนต่อไปให้เด่นขึ้นด้วยโทนสีเข้ากับระบบ */
+.reader-nav-btn.primary {
+  background-color: #0284c7;
+  border-color: #0ea5e9;
+  color: #ffffff;
+}
+
+.reader-nav-btn.primary:hover:not(:disabled) {
+  background-color: #0ea5e9;
+}
+
+/* สไตล์เมื่อปุ่มถูกปิดการใช้งาน (Disabled) */
+.reader-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background-color: #111827;
+  border-color: #1f2937;
+  color: #64748b;
 }
 
 /* --- ส่วนของ Chapter Drawer (Modal ด้านขวา) --- */

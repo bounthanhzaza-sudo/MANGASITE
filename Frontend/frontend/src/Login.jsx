@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider, facebookProvider } from './firebase'; // ปรับ path ตามตำแหน่งไฟล์ firebase.js ของคุณ
+import Swal from 'sweetalert2'; // นำเข้า SweetAlert2
 
 const Login = () => {
   const [name, setName] = useState('');
@@ -9,19 +10,44 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // ฟังก์ชันตั้งค่า Toast แจ้งเตือนมุมขวาบนให้เข้ากับธีมเว็บ
+  const showToast = async (titleText) => {
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+      background: '#1b2f4c', // สีพื้นหลังเข้ากับธีมเว็บ
+      color: '#ffffff',      // ตัวหนังสือสีขาว
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
+
+    await Toast.fire({
+      icon: 'success',
+      title: titleText,
+      iconColor: '#f59e0b' // สีไอคอนสอดคล้องกับธีม
+    });
+  };
+
   // ล็อกอินแบบปกติ (Username / Password & Admin)
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
-    const ADMIN_USERNAME = 'admin';
+    const ADMIN_USERNAME = 'Admin';
     const ADMIN_PASSWORD = 'admin123';
 
     if (name.trim() === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       localStorage.setItem('isAdmin', 'true');
       localStorage.setItem('currentUser', JSON.stringify({ name: ADMIN_USERNAME }));
-      alert('เข้าสู่ระบบสำเร็จ (ผู้ดูแลระบบ / Admin)');
+      
+      await showToast('เข้าสู่ระบบสำเร็จ (ผู้ดูแลระบบ / Admin)');
       navigate('/');
+      window.location.reload(); // รีเฟรชเพื่ออัปเดตสถานะ Navbar ทันที
       return;
     }
 
@@ -31,8 +57,10 @@ const Login = () => {
       if (userData.name === name && userData.password === password) {
         localStorage.setItem('isAdmin', 'false');
         localStorage.setItem('currentUser', JSON.stringify(userData));
-        alert('เข้าสู่ระบบสำเร็จ');
+        
+        await showToast('เข้าสู่ระบบสำเร็จ');
         navigate('/');
+        window.location.reload(); // รีเฟรชเพื่ออัปเดตสถานะ Navbar ทันที
         return;
       }
     }
@@ -56,8 +84,9 @@ const Login = () => {
         photo: user.photoURL
       }));
 
-      alert(`เข้าสู่ระบบสำเร็จด้วย ${providerName} (${user.displayName || user.email})`);
+      await showToast(`เข้าสู่ระบบสำเร็จด้วย ${providerName}`);
       navigate('/');
+      window.location.reload(); // รีเฟรชเพื่ออัปเดตสถานะ Navbar ทันที
     } catch (err) {
       console.error(err);
       setError(`ไม่สามารถเข้าสู่ระบบด้วย ${providerName} ได้: ${err.message}`);

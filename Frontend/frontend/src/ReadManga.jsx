@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Menu, X } from 'lucide-react';
+import { ArrowLeft, BookOpen, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import './ReadManga.css';
 
 const ReadManga = () => {
@@ -43,8 +43,13 @@ const ReadManga = () => {
     window.scrollTo(0, 0);
   }, [chapterId]);
 
+  // ค้นหา Index ของตอนปัจจุบันเพื่อเชื่อมโยงปุ่ม ตอนก่อนหน้า / ตอนต่อไป
+  const currentIndex = allChapters.findIndex(chap => String(chap.id) === String(chapterId));
+  const prevChapter = currentIndex > 0 ? allChapters[currentIndex - 1] : null;
+  const nextChapter = currentIndex !== -1 && currentIndex < allChapters.length - 1 ? allChapters[currentIndex + 1] : null;
+
   if (loading) {
-    return <div className="text-white p-12 text-center text-xl bg-[#0b0f19] min-h-screen">กำลังโหลดเนื้อหาตอน...</div>;
+    return <div className="text-white p-12 text-center text-xl bg-[#0b0f19] min-h-screen flex items-center justify-center">กำลังโหลดเนื้อหาตอน...</div>;
   }
 
   if (error || !chapterData) {
@@ -58,18 +63,40 @@ const ReadManga = () => {
 
   return (
     <div className="reader-container">
-      {/* แถบด้านบน */}
+      {/* แถบด้านบน (Top Bar) */}
       <div className="reader-header">
         <Link to={`/manga/${chapterData.manga_id}`} className="reader-back-btn">
           <ArrowLeft size={18} /> หน้าหลักมังงะ
         </Link>
         
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="chapter-title-display"
-        >
-          <Menu size={18} /> Chapter {parseInt(chapterData.chapter_number) || 1}
-        </button>
+        <div className="reader-header-actions">
+          {/* ปุ่มย่อ: ตอนก่อนหน้า (บน) */}
+          <button
+            onClick={() => prevChapter && navigate(`/read/${prevChapter.id}`)}
+            disabled={!prevChapter}
+            className="reader-back-btn"
+            title="ตอนก่อนหน้า"
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="chapter-title-display cursor-pointer"
+          >
+            <Menu size={18} /> Chapter {parseInt(chapterData.chapter_number) || 1}
+          </button>
+
+          {/* ปุ่มย่อ: ตอนต่อไป (บน) */}
+          <button
+            onClick={() => nextChapter && navigate(`/read/${nextChapter.id}`)}
+            disabled={!nextChapter}
+            className="reader-back-btn"
+            title="ตอนต่อไป"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </div>
 
       {/* ส่วนแสดงหน้าการ์ตูน */}
@@ -89,6 +116,42 @@ const ReadManga = () => {
             <p>ยังไม่มีรูปภาพหน้าการ์ตูนในตอนนี้</p>
           </div>
         )}
+      </div>
+
+      {/* --- ส่วนปุ่มเปลี่ยนตอนด้านล่างสุด (Bottom Navigation) แยกใช้คลาส CSS --- */}
+      <div className="reader-bottom-nav">
+        <button
+          onClick={() => {
+            if (prevChapter) {
+              navigate(`/read/${prevChapter.id}`);
+              window.scrollTo(0, 0);
+            }
+          }}
+          disabled={!prevChapter}
+          className="reader-nav-btn"
+        >
+          <ChevronLeft size={18} /> ตอนก่อนหน้า
+        </button>
+
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="reader-nav-btn"
+        >
+          <Menu size={18} /> เลือกตอนทั้งหมด
+        </button>
+
+        <button
+          onClick={() => {
+            if (nextChapter) {
+              navigate(`/read/${nextChapter.id}`);
+              window.scrollTo(0, 0);
+            }
+          }}
+          disabled={!nextChapter}
+          className="reader-nav-btn primary"
+        >
+          ตอนต่อไป <ChevronRight size={18} />
+        </button>
       </div>
 
       {/* --- Drawer รายชื่อตอนด้านขวา --- */}
@@ -113,13 +176,14 @@ const ReadManga = () => {
             <div className="drawer-body">
               {allChapters.length > 0 ? (
                 allChapters.map((chap) => {
-                  const isCurrent = chap.id === chapterData.id;
+                  const isCurrent = String(chap.id) === String(chapterId);
                   return (
                     <div 
                       key={chap.id}
                       onClick={() => {
                         setIsModalOpen(false);
                         navigate(`/read/${chap.id}`);
+                        window.scrollTo(0, 0);
                       }}
                       className={`chapter-item ${isCurrent ? 'active' : ''}`}
                     >

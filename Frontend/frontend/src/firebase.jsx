@@ -13,5 +13,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+
+// ตั้งค่า Google Provider ให้บังคับเลือกบัญชีทุกครั้ง (แก้ปัญหาจำบัญชีเดิมหรือมีหลายอีเมล)
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
 export const facebookProvider = new FacebookAuthProvider();

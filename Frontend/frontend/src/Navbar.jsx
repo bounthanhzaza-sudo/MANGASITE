@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Sun, Moon, Bookmark, BookOpen } from 'lucide-react';
+import Swal from 'sweetalert2';
 import './Navbar.css';
 
 const Navbar = ({ isDarkMode, setIsDarkMode, isLoggedIn, setIsLoggedIn }) => {
@@ -18,16 +19,37 @@ const Navbar = ({ isDarkMode, setIsDarkMode, isLoggedIn, setIsLoggedIn }) => {
     setIsDarkMode((prev) => !prev);
   };
 
-  // ฟังก์ชันจัดการออกจากระบบ (Logout)
-  const handleLogout = () => {
+  // ฟังก์ชันจัดการออกจากระบบ พร้อมแจ้งเตือนแบบ Toast สวยงามเข้ากับธีม
+  const handleLogout = async () => {
     localStorage.removeItem('isAdmin');
     localStorage.removeItem('currentUser');
     if (setIsLoggedIn) {
       setIsLoggedIn(false);
     }
-    alert('ออกจากระบบสำเร็จ');
+
+    // แสดง Toast แจ้งเตือนมุมขวาบนแบบเข้ากับธีมเว็บไซต์
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+      background: '#1b2f4c', // สีเข้ากับ Navbar ธีมมืด
+      color: '#ffffff',      // ตัวหนังสือสีขาว
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+      }
+    });
+
+    await Toast.fire({
+      icon: 'success',
+      title: 'ออกจากระบบสำเร็จ',
+      iconColor: '#f59e0b' // สีไอคอนสอดคล้องกับธีม
+    });
+
     navigate('/login');
-    window.location.reload(); // รีเฟรชหน้าจอเพื่อให้ Navbar อัปเดตสถานะทันที
+    window.location.reload(); // รีเฟรชหน้าจอให้อัปเดตสถานะ Navbar
   };
 
   useEffect(() => {
@@ -144,7 +166,7 @@ const Navbar = ({ isDarkMode, setIsDarkMode, isLoggedIn, setIsLoggedIn }) => {
           )}
         </div>
 
-        {/* ปุ่ม Login / Logout (อัปเดตให้รองรับ Google Login และ currentUser) */}
+        {/* ปุ่ม Login / Logout */}
         {isLoggedIn || isAdmin || currentUser ? (
           <button onClick={handleLogout} className="auth-action-btn logout-btn cursor-pointer">
             Logout
