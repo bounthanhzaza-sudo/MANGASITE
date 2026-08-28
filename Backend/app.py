@@ -15,7 +15,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 app = Flask(__name__)
 
-# เปิดใช้งาน CORS รองรับการเข้าถึง API ทุกโดเมน
+# เปิดใช้งาน CORS รองรับการเข้าถึง API ทุกโดเมน ป้องกันปัญหา CORS Policy
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Configure the upload folder for the Flask app
@@ -57,7 +57,7 @@ def get_db_connection():
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST", "localhost"),
             user=os.getenv("DB_USER", "root"),
-            port=int(os.getenv("DB_PORT", 3307)),
+            port=int(os.getenv("DB_PORT", 3306)),
             password=os.getenv("DB_PASSWORD", ""),
             database=os.getenv("DB_NAME", "manga-website"),
             autocommit=True
