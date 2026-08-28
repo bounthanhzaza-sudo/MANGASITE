@@ -25,7 +25,7 @@ const VideoModalButton = () => {
             </button>
             
             <video 
-              src="/Badapple.mp4" 
+              src={`${import.meta.env.BASE_URL}Badapple.mp4`} 
               controls 
               autoPlay 
               className="video-player"

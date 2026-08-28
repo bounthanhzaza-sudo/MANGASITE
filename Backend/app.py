@@ -1,4 +1,3 @@
-# backend/app.py
 import os
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
@@ -15,7 +14,9 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend communication
+
+# เปิดใช้งาน CORS รองรับการเข้าถึง API ทุกโดเมน
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Configure the upload folder for the Flask app
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -39,7 +40,15 @@ def normalize_cover_url(cover_url):
     if cleaned.startswith(('http://', 'https://')):
         return cleaned
 
-    return f"http://127.0.0.1:5000/uploads/{cleaned.lstrip('/')}"
+    # ดึงค่าจาก BACKEND_URL หรือถ้าอยู่บน Railway ให้ดึงจาก request host ได้อัตโนมัติ
+    base_url = os.getenv("BACKEND_URL")
+    if not base_url:
+        # หากไม่มีการตั้งค่าตัวแปร ให้ลองเช็กจาก Host ปัจจุบัน หรือใช้ localhost
+        host = request.host if request else "127.0.0.1:5000"
+        scheme = "https" if "railway.app" in host or (request and request.is_secure) else "http"
+        base_url = f"{scheme}://{host}"
+
+    return f"{base_url.rstrip('/')}/uploads/{cleaned.lstrip('/')}"
 
 
 def get_db_connection():
@@ -59,7 +68,16 @@ def get_db_connection():
         return None
 
 
-# --- API Endpoints ---
+# --- Root & API Endpoints ---
+@app.route('/', methods=['GET'])
+def home():
+    """Endpoint สำหรับตรวจสอบสถานะหน้าแรกของ Backend ไม่ให้เจอ 404"""
+    return jsonify({
+        "status": "online",
+        "message": "MangaSite Backend is running successfully!"
+    }), 200
+
+
 @app.route('/api/manga', methods=['GET'])
 def get_mangas():
     search_query = request.args.get('search', '').strip()
@@ -377,4 +395,5 @@ def delete_manga(manga_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)

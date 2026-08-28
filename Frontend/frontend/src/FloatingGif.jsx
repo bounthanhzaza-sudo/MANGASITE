@@ -2,8 +2,8 @@ import { useState, useRef } from 'react';
 import './FloatingGif.css';
 
 const mascotData = [
-  { gif: '/Speaki1.gif', sound: '/squash.mp3' },
-  { gif: '/Speaki2.gif', sound: '/deruzibazeyo.mp3' },
+  { gif: `${import.meta.env.BASE_URL}Speaki1.gif`, sound: `${import.meta.env.BASE_URL}squash.mp3` },
+  { gif: `${import.meta.env.BASE_URL}Speaki2.gif`, sound: `${import.meta.env.BASE_URL}deruzibazeyo.mp3` },
 ];
 
 const FloatingGif = () => {
@@ -21,7 +21,6 @@ const FloatingGif = () => {
       y: e.clientY - position.y
     };
     
-    // ฟัง Event ที่ window เพื่อให้ลากได้ลื่นไหลแม้เมาส์จะหลุดจากตัวรูป
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
   };
@@ -42,7 +41,6 @@ const FloatingGif = () => {
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseup', handleMouseUp);
 
-    // ถ้าไม่มีการย้ายที่ (moved เป็น false) ให้ถือว่าเป็นการคลิก
     if (!moved) handleClick();
   };
 
