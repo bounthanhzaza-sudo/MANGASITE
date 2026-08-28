@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'; // เปลี่ยนมา�
 import MangaCard from './Mangacard';
 import './MangaSection.css';
 
-
-const API_URL = 'http://127.0.0.1:5000/api/manga';
+// กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ค่า Railway เป็นค่าสำรอง
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://mangasite-production.up.railway.app";
+const API_URL = `${API_BASE_URL}/api/manga`;
 
 const NewUpdatesSection = () => {
   const [mangas, setMangas] = useState([]);

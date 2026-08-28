@@ -3,6 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import './ReadManga.css';
 
+// กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ค่า Railway เป็นค่าสำรอง
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://mangasite-production.up.railway.app";
+
 const ReadManga = () => {
   const { chapterId } = useParams();
   const navigate = useNavigate();
@@ -19,13 +22,13 @@ const ReadManga = () => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`http://127.0.0.1:5000/api/chapter/${chapterId}`);
+        const response = await fetch(`${API_BASE_URL}/api/chapter/${chapterId}`);
         if (!response.ok) throw new Error('ไม่สามารถโหลดข้อมูลตอนนี้ได้');
 
         const data = await response.json();
         setChapterData(data);
 
-        const chapListRes = await fetch(`http://127.0.0.1:5000/api/manga/${data.manga_id}/chapters`);
+        const chapListRes = await fetch(`${API_BASE_URL}/api/manga/${data.manga_id}/chapters`);
         if (chapListRes.ok) {
           const chapListData = await chapListRes.json();
           setAllChapters(chapListData);

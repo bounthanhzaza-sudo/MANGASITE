@@ -1,4 +1,3 @@
-// frontend/src/components/AddMangaForm.jsx
 import { useState } from 'react';
 import './AddMangaForm.css'; // นำเข้าไฟล์ CSS โทนสีทะเล
 
@@ -14,6 +13,9 @@ const AddMangaForm = () => {
   const [selectedGenres, setSelectedGenres] = useState(['Action']);
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState('');
+
+  // กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ค่า Railway เป็นค่าสำรอง
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://mangasite-production.up.railway.app";
 
   // รายการหมวดหมู่ทั้งหมดที่มีให้เลือก
   const availableGenres = ['Action', 'Romance', 'Fantasy', 'Comedy', 'Isekai', 'Drama'];
@@ -61,7 +63,7 @@ const AddMangaForm = () => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/manga/add_with_image', {
+      const response = await fetch(`${API_BASE_URL}/api/manga/add_with_image`, {
         method: 'POST',
         body: data,
       });
@@ -80,7 +82,7 @@ const AddMangaForm = () => {
         setImageFile(null);
         e.target.reset();
       } else {
-        setMessage(`Error: ${result.error}`);
+        setMessage(`Error: ${result.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Upload error:', error);

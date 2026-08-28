@@ -7,11 +7,14 @@ const MangaCard = ({ id, rank, title, category, coverUrl, onDelete }) => {
   // ตรวจสอบสถานะ Admin จาก localStorage
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
+  // กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ค่า Railway เป็นค่าสำรอง
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://mangasite-production.up.railway.app";
+
   const handleDeleteClick = async (e) => {
     e.stopPropagation(); // ป้องกันไม่ให้กดปุ่มแล้วเด้งไปหน้าอื่น
     if (window.confirm(`คุณต้องการลบเรื่อง "${title}" ใช่หรือไม่?`)) {
       try {
-        const response = await fetch(`http://127.0.0.1:5000/api/manga/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/manga/${id}`, {
           method: 'DELETE',
         });
         if (response.ok) {

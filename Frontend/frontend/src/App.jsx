@@ -35,25 +35,19 @@ const App = () => {
 
   // ตรวจสอบสถานะ Login จาก localStorage เมื่อโหลดแอปครั้งแรก
   useEffect(() => {
-    const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
+    const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true' || localStorage.getItem('currentUser') !== null;
     setIsLoggedIn(loggedInStatus);
   }, []);
-
-  // ฟังก์ชันสำหรับกด Logout
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    setIsLoggedIn(false);
-  };
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`} style={isDarkMode ? { backgroundImage: 'linear-gradient(to bottom, #111e38, #0a1128)' } : { backgroundColor: '#ffffff' }}>
       
-      {/* ส่งสถานะ isLoggedIn และฟังก์ชัน handleLogout ไปให้ Navbar */}
+      {/* ส่งสถานะ isDarkMode และ setIsLoggedIn ให้ Navbar */}
       <Navbar 
         isDarkMode={isDarkMode} 
         setIsDarkMode={setIsDarkMode} 
         isLoggedIn={isLoggedIn} 
-        onLogout={handleLogout} 
+        setIsLoggedIn={setIsLoggedIn}
       />
  
       <div className="mx-auto max-w-7xl px-4 py-6">

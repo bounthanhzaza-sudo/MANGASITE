@@ -17,11 +17,19 @@
   color: #f5f5f5;
 }
 
+/* บังคับซ่อนเมนู Desktop บนมือถือแบบเด็ดขาด */
 .navbar-links {
-  display: flex;
+  display: none !important;
   align-items: center;
   gap: 1rem;
   margin-left: 2.5rem;
+}
+
+/* แสดงผลแบบ Flex เฉพาะหน้าจอขนาด 768px ขึ้นไป (Tablet / Desktop) */
+@media (min-width: 768px) {
+  .navbar-links {
+    display: flex !important;
+  }
 }
 
 /* ปรับสีตัวอักษรเมนูลิงก์ให้สว่างชัดเจนในโหมดมืด */
@@ -187,14 +195,15 @@ html.dark .search-item span {
 html:not(.dark) .search-item span {
   color: #1e293b;
 }
+
 /* สไตล์สำหรับปุ่ม Login และ Logout ใน Navbar */
 .auth-action-btn {
-  height: 2.5rem; /* เทียบเท่า h-10 */
+  height: 2.5rem;
   display: flex;
   align-items: center;
   padding-left: 1rem;
   padding-right: 1rem;
-  border-radius: 0.5rem; /* rounded-lg */
+  border-radius: 0.5rem;
   font-weight: 500;
   transition: all 0.2s ease-in-out;
   border-width: 1px;
@@ -202,7 +211,7 @@ html:not(.dark) .search-item span {
   text-decoration: none;
 }
 
-/* ปุ่ม Login (เปลี่ยนสีตามโหมดมืด/สว่างอัตโนมัติจาก HTML class="dark") */
+/* ปุ่ม Login */
 html:not(.dark) .login-action-btn {
   background-color: #f3f4f6;
   color: #1f2937;

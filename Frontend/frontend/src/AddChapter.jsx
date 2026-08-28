@@ -11,6 +11,9 @@ const AddChapter = () => {
   const [selectedFiles, setSelectedFiles] = useState([]); // เก็บเป็น Array
   const [uploading, setUploading] = useState(false);
 
+  // กำหนด Base URL: ดึงจาก Environment Variable บน Railway/Vite หรือใช้ลิงก์ Production เป็นค่าสำรอง
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://mangasite-production.up.railway.app";
+
   const handleFileChange = (e) => {
     // แปลง FileList เป็น Array เพื่อให้จัดการและแสดงผลชื่อไฟล์ได้ง่ายขึ้น
     setSelectedFiles(Array.from(e.target.files));
@@ -32,7 +35,7 @@ const AddChapter = () => {
 
     try {
       setUploading(true);
-      const response = await fetch(`http://127.0.0.1:5000/api/manga/${id}/add_chapter`, {
+      const response = await fetch(`${API_BASE_URL}/api/manga/${id}/add_chapter`, {
         method: 'POST',
         body: formData,
       });
@@ -41,10 +44,12 @@ const AddChapter = () => {
         alert("เพิ่มตอนสำเร็จ!");
         navigate(`/manga/${id}`);
       } else {
-        alert("เกิดข้อผิดพลาดในการอัปโหลด");
+        const errorData = await response.json().catch(() => ({}));
+        alert(`เกิดข้อผิดพลาดในการอัปโหลด: ${errorData.error || response.statusText}`);
       }
     } catch (error) {
       console.error('Error:', error);
+      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
     } finally {
       setUploading(false);
     }
@@ -52,7 +57,9 @@ const AddChapter = () => {
 
   return (
     <div className="add-chapter-container">
-      <h2 className="add-chapter-title">Add New Chapter</h2>
+      <h2 className="add-chapter-title">
+        <PlusCircle className="inline-block mr-2" /> Add New Chapter
+      </h2>
       
       <form onSubmit={handleSubmit}>
         <div className="form-group">

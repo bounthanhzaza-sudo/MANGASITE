@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { Star, Bookmark, BookOpen, Plus, Trash2 } from 'lucide-react';
 import './MangaDetail.css';
 
-const API_URL = 'http://127.0.0.1:5000/api/manga';
+// กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ค่า Railway เป็นค่าสำรอง
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://mangasite-production.up.railway.app";
 
 const MangaDetail = () => {
   const { id } = useParams(); // รับค่า ID จาก URL เช่น /manga/4
@@ -17,8 +18,8 @@ const MangaDetail = () => {
   const fetchMangaDetail = async () => {
     try {
       setLoading(true);
-      // ดึงรายการมังงะทั้งหมดจาก Backend
-      const response = await fetch(API_URL);
+      // ดึงรายการมังงะทั้งหมดจาก Backend ผ่าน API_BASE_URL
+      const response = await fetch(`${API_BASE_URL}/api/manga`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch manga list');
@@ -134,7 +135,7 @@ const MangaDetail = () => {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/chapter/${chapterId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/chapter/${chapterId}`, {
         method: 'DELETE',
       });
 
