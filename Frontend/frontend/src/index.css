@@ -3,17 +3,37 @@
 /* กำหนด Variant สำหรับ Dark Mode ใน Tailwind v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* บังคับสีพื้นหลังและตัวอักษรของธีมมืดเดิมที่คุณต้องการ */
-.dark body {
-  background-image: linear-gradient(to bottom, #223a60, #010730) !important;
-  color: #f8fafc !important;
-  min-height: 100vh;
+/* ==========================================
+   FIX: แก้ไขปัญหาเลื่อนหน้าจอ (Scroll) บนมือถือไม่ได้
+   ========================================== */
+html {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto !important; /* บังคับให้หน้าเว็บเลื่อนแนวตั้งได้เสมอ */
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  height: auto !important;
+  overflow-x: hidden;
+  overflow-y: auto !important; /* ป้องกันไม่ให้ตัวบอดี้บล็อกการเลื่อน */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   background-color: #ffffff;
   color: #111827;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* บังคับสีพื้นหลังและตัวอักษรของธีมมืด */
+.dark body {
+  background-image: linear-gradient(to bottom, #223a60, #010730) !important;
+  background-attachment: fixed !important;
+  color: #f8fafc !important;
   min-height: 100vh;
+  height: auto !important;
+  overflow-y: auto !important;
 }
