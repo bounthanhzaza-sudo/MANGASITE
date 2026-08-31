@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './FloatingGif.css';
 
 const mascotData = [
@@ -10,9 +10,14 @@ const FloatingGif = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [position, setPosition] = useState({ x: 20, y: 20 });
   
-  const audioRef = useRef(null);
   const dragRef = useRef({ isDragging: false, mouseOffset: { x: 0, y: 0 } });
   const hasMovedRef = useRef(false);
+
+  // Preload เสียงเตรียมไว้ล่วงหน้าทั้งสองไฟล์ ป้องกันมือถือโหลดไม่ทันแล้วค้าง/หาย
+  const audioRefs = useRef([]);
+  useEffect(() => {
+    audioRefs.current = mascotData.map((item) => new Audio(item.sound));
+  }, []);
 
   // --- ระบบลากสำหรับ Mouse (คอมพิวเตอร์) ---
   const handleMouseDown = (e) => {
@@ -75,26 +80,27 @@ const FloatingGif = () => {
     window.removeEventListener('touchmove', handleTouchMove);
     window.removeEventListener('touchend', handleTouchEnd);
 
-    // ถ้าจิ้มบนมือถือแล้วไม่ได้ลาก ให้สั่งสลับรูปทำงานทันที!
     if (!hasMovedRef.current) {
       handleClick();
     }
   };
 
-  // --- ฟังก์ชันสลับรูปและเสียงแบบชัวร์ 100% (สลับไปมาระหว่าง 0 และ 1) ---
+  // --- ฟังก์ชันสลับรูปและเล่นเสียงแบบปลอดภัย ---
   const handleClick = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    
-    // สลับค่า index ทันที (0 เป็น 1, 1 เป็น 0)
-    const nextIndex = currentIndex === 0 ? 1 : 0;
-    
-    setCurrentIndex(nextIndex);
-    const newAudio = new Audio(mascotData[nextIndex].sound);
-    audioRef.current = newAudio;
-    newAudio.play().catch((e) => console.log("Playback failed", e));
+    // 1. สลับ Index แบบ Functional Update ป้องกันค่าซ้อนทับกัน
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex === 0 ? 1 : 0;
+      
+      // 2. เล่นเสียงที่เตรียมไว้ล่วงหน้า
+      const currentAudio = audioRefs.current[nextIndex];
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio.play().catch((e) => console.log("Playback failed", e));
+      }
+
+      return nextIndex;
+    });
   };
 
   return (
@@ -105,13 +111,18 @@ const FloatingGif = () => {
         top: `${position.y}px`,
         position: 'fixed',
         zIndex: 9999,
-        touchAction: 'none' // ป้องกันหน้าจอเว็บเลื่อนตอนเอานิ้วลากมาสคอต
+        touchAction: 'none'
       }}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
       title="ลากเพื่อย้ายที่ หรือคลิกเพื่อสุ่ม!"
     >
-      <img src={mascotData[currentIndex].gif} alt="Mascot" className="floating-gif-image" style={{ pointerEvents: 'none' }} />
+      <img 
+        src={mascotData[currentIndex].gif} 
+        alt="Mascot" 
+        className="floating-gif-image" 
+        style={{ pointerEvents: 'none' }} 
+      />
     </div>
   );
 };
