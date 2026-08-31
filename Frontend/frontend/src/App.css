@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
 
-
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -185,25 +184,27 @@
     border-right-color: var(--border);
   }
 }
-/* เพิ่มการกำหนดฟอนต์และสไตล์พื้นฐานตรงนี้ได้เลยครับ */
+
+/* สไตล์พื้นฐาน */
 body {
-  font-family: 'Prompt', sans-serif; /* หรือเลือกชื่อฟอนต์ที่คุณชอบ */
+  font-family: 'Prompt', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #93b3f2; /* ปรับสีพื้นหลังภาพรวมของเว็บตามต้องการ */
-  color: #1f2937; /* ปรับสีตัวอักษรหลักให้อ่านง่าย */
-  font-size: 16px; /* ขนาดตัวอักษรพื้นฐาน */
+  background-color: #93b3f2;
+  color: #1f2937;
+  font-size: 16px;
 }
+
 .manga-title {
-  font-family: 'Bangers', cursive; /* เรียกใช้ฟอนต์แนวคอมมิค */
-  font-size: 22px;                 /* ปรับขนาดตัวอักษรตามต้องการ */
-  letter-spacing: 1.5px;           /* เพิ่มระยะห่างระหว่างตัวหนังสือให้ดูเท่ขึ้น */
+  font-family: 'Bangers', cursive;
+  font-size: 22px;
+  letter-spacing: 1.5px;
 }
-/* --- เพิ่มการรองรับ Dark Mode สำหรับไฟล์ App.css (SCSS) --- */
+
+/* รองรับ Dark Mode */
 html.dark body {
   min-height: 100vh !important;
   background-attachment: fixed !important;
-  /* ลองใช้สีที่ตัดกันชัดเจนเพื่อทดสอบดูก่อนครับ */
   background-image: linear-gradient(to bottom, #223a60, #010730) !important; 
   color: #ffffff !important;
 }
@@ -214,16 +215,20 @@ html.dark h3,
 html.dark p,
 html.dark .manga-section-title {
   color: #ffffff !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); /* เพิ่มเงาดำใต้ตัวหนังสือให้อ่านง่ายขึ้น */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
+
 /* ==========================================
    MOBILE RESPONSIVE OPTIMIZATIONS (<= 768px)
    ========================================== */
 @media (max-width: 768px) {
-  /* 1. ป้องกันหน้าจอมือถือเลื่อนซ้ายขวา */
-  body, html {
-    overflow-x: hidden;
+  /* 1. แก้ไขให้จอมือถือไม่ล้นซ้ายขวา และอนุญาตให้เลื่อนขึ้นลงแนวตั้งได้ปกติ */
+  html, body {
     width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* 2. ปรับหน้าแรกและส่วนแสดงผลมังงะให้เรียงสวยบนมือถือ */
@@ -231,7 +236,7 @@ html.dark .manga-section-title {
   #manga-container,
   .manga-list-container {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* บังคับแสดงผล 2 คอลัมน์บนมือถือ */
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
     padding: 10px !important;
   }
@@ -242,7 +247,7 @@ html.dark .manga-section-title {
     margin-bottom: 8px;
     
     img {
-      height: 200px !important; /* ล็อกความสูงรูปปกมังงะไม่ให้ยาวเกินไป */
+      height: 200px !important;
       object-fit: cover;
     }
   }
@@ -277,7 +282,7 @@ html.dark .manga-section-title {
     padding: 12px !important;
     
     input[type="text"] {
-      width: 100% !important; /* ช่องค้นหาขยายเต็มจอในมือถือ */
+      width: 100% !important;
     }
   }
 }
