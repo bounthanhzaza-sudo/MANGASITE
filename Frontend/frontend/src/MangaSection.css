@@ -1,0 +1,45 @@
+/* frontend/src/components/MangaSection.css */
+.manga-section-container {
+  padding: 1rem 1.5rem;
+}
+
+.manga-section-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  /* ใช้สีข้อความปกติแทนการทำ text-fill-color โปร่งใส เพื่อให้อ่านง่ายในโหมดมืด */
+  color: #1f2937; /* สีเข้มสำหรับโหมดปกติ */
+}
+
+/* รองรับ Dark Mode ให้หัวข้อเปลี่ยนเป็นสีขาวสว่างหรือไล่สีโทนสว่างชัดเจน */
+html.dark .manga-section-title {
+  background-image: linear-gradient(to right, #f8fafc, #94a3b8); /* ไล่เฉดสีขาวไปหาเทาอ่อน */
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.manga-scroll-wrapper {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr)); /* บังคับให้ 1 แถวมี 6 เรื่องตรงเป๊ะ */
+  gap: 16px;
+  width: 100%;
+}
+
+/* ซ่อน Scrollbar */
+.manga-scroll-wrapper::-webkit-scrollbar {
+  display: none;
+}
+.manga-scroll-wrapper {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr)); /* กำหนดให้ 1 แถวมี 6 คอลัมน์ (ปรับเลข 6 ตามต้องการ) */
+  gap: 16px; /* ระยะห่างระหว่างการ์ด */
+  width: 100%;
+}
+
+.manga-card-item {
+  flex: 0 0 auto;
+  width: 176px; /* ขนาดการ์ดคงเดิมตามที่คุณต้องการ */
+  scroll-snap-align: start; /* ล็อกตำแหน่งเวลาเลื่อน */
+  transition: transform 0.3s ease, filter 0.3s ease;
+}

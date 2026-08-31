@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
+/* กล่องฟอร์มหลักโทนสีทะเล */
+.ocean-form-container {
+  max-width: 550px;
+  margin: 30px auto;
+  padding: 30px;
+  background: linear-gradient(135deg, #0f4c81 0%, #1e3a8a 100%);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(15, 76, 129, 0.3);
+  color: #f0f9ff;
+  border: 1px solid #38bdf8;
+  box-sizing: border-box;
+}
+
+/* หัวข้อฟอร์ม */
+.ocean-form-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2.2rem;
+  text-align: center;
+  letter-spacing: 1.5px;
+  color: #38bdf8;
+  margin-bottom: 25px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* จัดกลุ่มฟิลด์ฟอร์มให้มีระยะห่างสวยงาม */
+.ocean-form-group {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.ocean-form-group label {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  color: #bae6fd;
+  font-weight: 500;
+}
+
+/* ช่องกรอกข้อมูล ปรับขนาดให้เต็มพอดีกล่องเป๊ะๆ (box-sizing) */
+.ocean-input, 
+.ocean-textarea, 
+.ocean-select {
+  width: 100%;
+  padding: 12px 14px;
+  background-color: #0c4a6e;
+  border: 1px solid #0284c7;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.ocean-input::placeholder, 
+.ocean-textarea::placeholder {
+  color: #7dd3fc;
+}
+
+.ocean-input:focus, 
+.ocean-textarea:focus, 
+.ocean-select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+}
+
+/* ปรับแต่งช่องเลือกไฟล์ */
+.ocean-file-input {
+  padding: 8px;
+}
+
+.ocean-file-input::-webkit-file-upload-button {
+  background-color: #0284c7;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 12px;
+  transition: background 0.2s;
+}
+
+.ocean-file-input::-webkit-file-upload-button:hover {
+  background-color: #0ea5e9;
+}
+
+/* จัดเรียง Dropdown 2 ช่อง (เดิม) */
+.ocean-row {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
+
+/* จัดเรียง Dropdown 3 ช่อง (ใหม่ สำหรับ Status, Category, Genre) */
+.ocean-row-3 {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ปุ่ม Add Manga */
+.ocean-submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+
+.ocean-submit-btn:hover {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(14, 165, 233, 0.5);
+}
+
+/* ข้อความแจ้งเตือนสถานะ */
+.ocean-message {
+  margin-top: 15px;
+  text-align: center;
+  font-weight: 500;
+}
