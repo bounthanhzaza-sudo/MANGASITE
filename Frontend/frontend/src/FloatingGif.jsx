@@ -12,69 +12,48 @@ const FloatingGif = () => {
   
   const audioRef = useRef(null);
   const dragRef = useRef({ isDragging: false, mouseOffset: { x: 0, y: 0 } });
-  
-  // ใช้ตัวแปรนี้เช็กชัวร์ๆ ว่ามีการขยับนิ้ว/เมาส์จริงๆ หรือเป็นการกดจิ้มธรรมดา
   const hasMovedRef = useRef(false);
 
-  const handleStart = (clientX, clientY) => {
+  // --- ใช้ Pointer Events (รองรับทั้งคอมและมือถือโดยไม่เบิ้ล) ---
+  const handlePointerDown = (e) => {
     dragRef.current.isDragging = true;
-    hasMovedRef.current = false; // เริ่มต้นนับว่ายังไม่ได้ลาก
+    hasMovedRef.current = false;
     dragRef.current.mouseOffset = {
-      x: clientX - position.x,
-      y: clientY - position.y
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
     };
+    
+    // ล็อกเป้าหมายการลาก
+    e.target.setPointerCapture(e.pointerId);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
   };
 
-  const handleMove = (clientX, clientY) => {
+  const handlePointerMove = (e) => {
     if (!dragRef.current.isDragging) return;
-    hasMovedRef.current = true; // ถ้ามีการขยับเมาส์/นิ้ว แปลว่ากำลังลากแน่นอน
+    hasMovedRef.current = true; // ถ้ามีการเคลื่อนที่ แปลว่ากำลังลาก
     setPosition({
-      x: clientX - dragRef.current.mouseOffset.x,
-      y: clientY - dragRef.current.mouseOffset.y
+      x: e.clientX - dragRef.current.mouseOffset.x,
+      y: e.clientY - dragRef.current.mouseOffset.y
     });
   };
 
-  const handleEnd = () => {
+  const handlePointerUp = (e) => {
     if (!dragRef.current.isDragging) return;
-    
     dragRef.current.isDragging = false;
 
-    // ถอด Event ออกเมื่อปล่อย
-    window.removeEventListener('mousemove', handleMouseMove);
-    window.removeEventListener('mouseup', handleMouseUp);
-    window.removeEventListener('touchmove', handleTouchMove);
-    window.removeEventListener('touchend', handleTouchend);
+    try {
+      e.target.releasePointerCapture(e.pointerId);
+    } catch (err) {}
 
-    // ถ้าไม่ได้ขยับ (เป็นการกดจิ้มเฉยๆ) ให้สั่งสุ่มทำงาน!
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointerup', handlePointerUp);
+
+    // ถ้าไม่ได้ลาก (เป็นการจิ้มคลิกธรรมดา) ให้สุ่มทำงานรอบเดียวเป๊ะๆ
     if (!hasMovedRef.current) {
       handleClick();
     }
   };
-
-  // --- Mouse Events ---
-  const handleMouseDown = (e) => {
-    handleStart(e.clientX, e.clientY);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleMouseMove = (e) => handleMove(e.clientX, e.clientY);
-  const handleMouseUp = () => handleEnd();
-
-  // --- Touch Events (สำหรับมือถือ) ---
-  const handleTouchStart = (e) => {
-    const touch = e.touches[0];
-    handleStart(touch.clientX, touch.clientY);
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('touchend', handleTouchend);
-  };
-
-  const handleTouchMove = (e) => {
-    const touch = e.touches[0];
-    handleMove(touch.clientX, touch.clientY);
-  };
-
-  const handleTouchend = () => handleEnd();
 
   const handleClick = () => {
     if (audioRef.current) {
@@ -101,10 +80,9 @@ const FloatingGif = () => {
         top: `${position.y}px`,
         position: 'fixed',
         zIndex: 9999,
-        touchAction: 'none'
+        touchAction: 'none' // ป้องกันหน้าจอเลื่อนเวลาเอานิ้วลากมาสคอต
       }}
-      onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
+      onPointerDown={handlePointerDown}
       title="ลากเพื่อย้ายที่ หรือคลิกเพื่อสุ่ม!"
     >
       <img src={mascotData[currentIndex].gif} alt="Mascot" className="floating-gif-image" style={{ pointerEvents: 'none' }} />
