@@ -18,90 +18,67 @@ const MangaDetail = () => {
   const fetchMangaDetail = async () => {
     try {
       setLoading(true);
-      // ดึงรายการมังงะทั้งหมดจาก Backend ผ่าน API_BASE_URL
-      const response = await fetch(`${API_BASE_URL}/api/manga`);
+      // เปลี่ยนจากดึงทั้งหมดมาค้นหาเอง เป็นการดึงผ่าน Endpoint รายเรื่องโดยตรง
+      const response = await fetch(`${API_BASE_URL}/api/manga/${id}`);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch manga list');
+        if (response.status === 404) {
+          throw new Error('Manga not found');
+        }
+        throw new Error('Failed to fetch manga detail');
       }
 
-      const result = await response.json();
+      const foundManga = await response.json();
 
-      // ค้นหาเรื่องที่ id ตรงกับที่ส่งมาทาง URL
-      const foundManga = result.find((item) => String(item.id) === String(id));
-
-      if (foundManga) {
-        // ดัดแปลงและแปลงรูปแบบ chapters ให้แสดงผลเป็น Chapter X อย่างถูกต้อง
-        let processedChapters = [];
-        if (Array.isArray(foundManga.chapters)) {
-          processedChapters = foundManga.chapters.map((chap, idx) => {
-            const chapNum = typeof chap === 'object' && chap !== null 
-              ? (chap.chapter_number || chap.title || idx + 1)
-              : chap;
-            
-            const parsedNum = parseFloat(chapNum);
-            const displayNum = !isNaN(parsedNum) && parsedNum > 0 ? parsedNum : idx + 1;
-
-            return {
-              id: (typeof chap === 'object' && chap !== null && chap.id) ? chap.id : idx + 1,
-              title: `Chapter ${displayNum}`,
-              date: (typeof chap === 'object' && chap !== null) ? (chap.date || '') : ''
-            };
-          });
-        }
-
-        // ดึง Category หลัก (เช่น Manhwa, Manga) และ Genre มารวมกันเป็น Array ของแท็ก
-        const categoryTag = foundManga.category || foundManga.type || 'Manga';
-        let parsedGenres = [];
-        
-        if (foundManga.genre) {
-          parsedGenres = foundManga.genre.split(',').map(g => g.trim()).filter(Boolean);
-        } else if (Array.isArray(foundManga.genres)) {
-          parsedGenres = foundManga.genres;
-        }
-
-        // นำ Category มารวมไว้หน้าสุด และกรองไม่ให้ชื่อซ้ำกัน
-        const combinedGenres = [categoryTag, ...parsedGenres.filter(g => g.toLowerCase() !== categoryTag.toLowerCase())];
-
-        const formattedManga = {
-          id: foundManga.id,
-          title: foundManga.title,
-          cover: foundManga.coverUrl || foundManga.cover_image_url || foundManga.cover,
-          type: categoryTag,
-          status: foundManga.status || 'Ongoing',
-          rating: foundManga.rating || '9.0',
-          bookmarksCount: '0 Users Bookmarked',
-          published: foundManga.published || '2026',
-          author: foundManga.author || 'Unknown',
-          totalChapter: foundManga.totalChapter || `${processedChapters.length} Chapters`,
-          serialization: foundManga.serialization || 'Local',
-          genres: combinedGenres,
-          chapters: processedChapters
-        };
-
-        setMangaData(formattedManga);
-
-        // ตรวจสอบว่าเรื่องนี้เคยถูกบันทึกใน localStorage หรือยัง เพื่อเปิดสถานะปุ่ม
-        const savedFavs = JSON.parse(localStorage.getItem('favoriteMangas')) || [];
-        const isExist = savedFavs.some((item) => String(item.id) === String(id));
-        setIsFavorite(isExist);
-
-      } else {
-        // กรณีหาไม่พบ ให้แสดงข้อมูลสำรอง
-        const fallbackData = {
-          id,
-          title: `Manga ID: ${id}`,
-          cover: '',
-          status: 'Ongoing',
-          type: 'Manga',
-          rating: '9.0',
-          genres: ['Manga', 'Action'],
-          chapters: []
-        };
-        setMangaData(fallbackData);
+      // ดัดแปลงและแปลงรูปแบบ chapters ให้แสดงผลเป็น Chapter X อย่างถูกต้อง
+      let processedChapters = [];
+      if (Array.isArray(foundManga.chapters)) {
+        processedChapters = foundManga.chapters.map((chap, idx) => {
+          const chapNum = chap.title || chap.chapter_number || (idx + 1);
+          return {
+            id: chap.id,
+            title: `Chapter ${chapNum}`,
+            date: chap.date || ''
+          };
+        });
       }
+
+      // ดึง Category และ Genre
+      const categoryTag = foundManga.category || 'Manga';
+      let parsedGenres = [];
+      if (foundManga.genre) {
+        parsedGenres = foundManga.genre.split(',').map(g => g.trim()).filter(Boolean);
+      }
+
+      const combinedGenres = [categoryTag, ...parsedGenres.filter(g => g.toLowerCase() !== categoryTag.toLowerCase())];
+
+      const formattedManga = {
+        id: foundManga.id,
+        title: foundManga.title,
+        description: foundManga.description,
+        cover: foundManga.coverUrl,
+        type: categoryTag,
+        status: foundManga.status || 'Ongoing',
+        rating: foundManga.rating || '9.0',
+        bookmarksCount: '0 Users Bookmarked',
+        published: foundManga.published || '2026',
+        author: foundManga.author || 'Unknown',
+        totalChapter: `${processedChapters.length} Chapters`,
+        serialization: foundManga.serialization || 'Local',
+        genres: combinedGenres,
+        chapters: processedChapters
+      };
+
+      setMangaData(formattedManga);
+
+      // ตรวจสอบ Favorite
+      const savedFavs = JSON.parse(localStorage.getItem('favoriteMangas')) || [];
+      const isExist = savedFavs.some((item) => String(item.id) === String(id));
+      setIsFavorite(isExist);
+
     } catch (error) {
       console.error('Error loading manga detail:', error);
+      setMangaData(null);
     } finally {
       setLoading(false);
     }

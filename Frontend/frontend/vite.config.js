@@ -3,5 +3,21 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // สำคัญมากสำหรับโปรเจกต์ที่แยก Deploy แบบนี้
+  base: './',
+  server: {
+    proxy: {
+      // เมื่อเรียก /api ในโค้ด จะถูกส่งไปยัง Backend อัตโนมัติ
+      '/api': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+        secure: false,
+      },
+      // เมื่อเรียก /uploads จะถูกส่งไปยัง Backend เพื่อดึงรูปภาพ
+      '/uploads': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 })
