@@ -7,8 +7,8 @@ const MangaCard = ({ id, rank, title, category, coverUrl, onDelete }) => {
   // ตรวจสอบสถานะ Admin จาก localStorage
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
-  // กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ค่า Railway เป็นค่าสำรอง
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://cheerful-stillness-production-1be7.up.railway.app";
+  // กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ Localhost เป็นค่าสำรองเวลาเทสบนเครื่อง
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   const handleDeleteClick = async (e) => {
     e.stopPropagation(); // ป้องกันไม่ให้กดปุ่มแล้วเด้งไปหน้าอื่น

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './MangaFilter.css'; // นำเข้าไฟล์ CSS ที่สร้างขึ้น
 
-// กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ค่า Railway เป็นค่าสำรอง
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://cheerful-stillness-production-1be7.up.railway.app";
+// กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ Localhost เป็นค่าสำรองเวลาเทสบนเครื่อง
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const MangaFilter = () => {
   const [mangas, setMangas] = useState([]);

@@ -3,8 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import './ReadManga.css';
 
-// กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ค่า Railway เป็นค่าสำรอง
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://cheerful-stillness-production-1be7.up.railway.app";
+// กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ Localhost เป็นค่าสำรองเวลาเทสบนเครื่อง
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const ReadManga = () => {
   const { chapterId } = useParams();

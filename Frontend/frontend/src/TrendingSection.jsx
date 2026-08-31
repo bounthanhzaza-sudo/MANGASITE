@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'; // 1. นำเข้า Link สำห
 import MangaCard from './Mangacard';
 import './MangaSection.css';
 
-// กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ค่า Railway เป็นค่าสำรอง
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://cheerful-stillness-production-1be7.up.railway.app";
+// กำหนด Base URL: ดึงจากค่า Environment Variable ของ Vite หรือใช้ Localhost เป็นค่าสำรองเวลาเทสบนเครื่อง
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 const API_URL = `${API_BASE_URL}/api/manga`;
 
 const TrendingSection = () => {
@@ -36,13 +36,13 @@ const TrendingSection = () => {
       <div className="manga-scroll-wrapper">
         {mangas.map((manga, index) => (
           /* 2. ใช้ Link ครอบเพื่อให้คลิกแล้วพุ่งไปที่หน้า /manga/:id */
-          <Link to={`/manga/${manga.id}`} key={manga.id} className="no-underline">
+          <Link to={`/manga/${manga.id || manga._id}`} key={manga.id || manga._id} className="no-underline">
             <div className="manga-card-item">
               <MangaCard
                 rank={index + 1}
                 title={manga.title}
                 category={manga.category}
-                coverUrl={manga.coverUrl || manga.cover_image_url}
+                coverUrl={manga.coverUrl || manga.cover_image_url || manga.image}
               />
             </div>
           </Link>

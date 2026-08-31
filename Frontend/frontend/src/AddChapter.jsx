@@ -11,8 +11,8 @@ const AddChapter = () => {
   const [selectedFiles, setSelectedFiles] = useState([]); // เก็บเป็น Array
   const [uploading, setUploading] = useState(false);
 
-  // กำหนด Base URL: ดึงจาก Environment Variable บน Railway/Vite หรือใช้ลิงก์ Production จริงเป็นค่าสำรอง
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://cheerful-stillness-production-1be7.up.railway.app";
+  // กำหนด Base URL: ดึงจาก Environment Variable หรือใช้ Localhost เป็นค่าสำรองเวลาเทสบนเครื่อง
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
   const handleFileChange = (e) => {
     // แปลง FileList เป็น Array เพื่อให้จัดการและแสดงผลชื่อไฟล์ได้ง่ายขึ้น

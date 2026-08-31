@@ -40,7 +40,7 @@ def normalize_cover_url(cover_url):
     if cleaned.startswith(('http://', 'https://')):
         return cleaned
 
-    # ดึงค่าจาก BACKEND_URL หรือถ้าอยู่บน Railway ให้ดึงจาก RENDER_EXTERNAL_URL / RAILWAY_STATIC_URL
+    # ดึงค่าจาก BACKEND_URL หรือถ้าอยู่บน Railway ให้ดึงจาก RAILWAY_STATIC_URL
     base_url = os.getenv("BACKEND_URL") or os.getenv("RAILWAY_STATIC_URL")
     
     if not base_url:
@@ -57,9 +57,9 @@ def get_db_connection():
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST", "localhost"),
             user=os.getenv("DB_USER", "root"),
-            port=int(os.getenv("DB_PORT", 3306)),
+            port=int(os.getenv("DB_PORT", 3307)),  # ปรับพอร์ตมาตรฐานเป็น 3306 (หรือแก้ตามจริงใน .env)
             password=os.getenv("DB_PASSWORD", ""),
-            database=os.getenv("DB_NAME", "manga-website"),
+            database=os.getenv("DB_NAME", "manga-website"), # ปรับชื่อ DB ตามที่คุณใช้งาน
             autocommit=True
         )
         return conn
@@ -155,6 +155,7 @@ def add_manga_with_image():
     if image_file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
+    save_path = ""
     if image_file and allowed_file(image_file.filename):
         original_filename = secure_filename(image_file.filename)
         extension = original_filename.rsplit('.', 1)[1].lower()
@@ -166,6 +167,8 @@ def add_manga_with_image():
 
     conn = get_db_connection()
     if not conn:
+        if os.path.exists(save_path):
+            os.remove(save_path)
         return jsonify({"error": "Database connection failed"}), 500
 
     cursor = conn.cursor()
@@ -210,6 +213,7 @@ def add_chapter(manga_id):
         return jsonify({"error": "Database connection failed"}), 500
     
     cursor = conn.cursor()
+    saved_paths = []
     try:
         cursor.execute(
             """
@@ -236,6 +240,7 @@ def add_chapter(manga_id):
                 save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
                 
                 file.save(save_path)
+                saved_paths.append(save_path)
 
                 cursor.execute(
                     "INSERT INTO chapter_pages (chapter_id, image_url, page_order) VALUES (%s, %s, %s)",
@@ -246,6 +251,9 @@ def add_chapter(manga_id):
         return jsonify({"message": "Chapter and pages added successfully!", "chapter_id": chapter_id}), 201
     except mysql.connector.Error as err:
         conn.rollback()
+        for path in saved_paths:
+            if os.path.exists(path):
+                os.remove(path)
         print(f"Database Error in add_chapter: {err}")
         return jsonify({"error": str(err)}), 500
     finally:
