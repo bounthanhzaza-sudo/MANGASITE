@@ -13,35 +13,69 @@ const FloatingGif = () => {
   const audioRef = useRef(null);
   const dragRef = useRef({ isDragging: false, startPos: { x: 0, y: 0 }, mouseOffset: { x: 0, y: 0 } });
 
-  const handleMouseDown = (e) => {
+  // ฟังก์ชันคำนวณตำแหน่งเริ่มต้น (รองรับทั้ง Mouse และ Touch)
+  const handleStart = (clientX, clientY) => {
     dragRef.current.isDragging = true;
-    dragRef.current.startPos = { x: e.clientX, y: e.clientY };
+    dragRef.current.startPos = { x: clientX, y: clientY };
     dragRef.current.mouseOffset = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
+      x: clientX - position.x,
+      y: clientY - position.y
     };
+  };
+
+  // ฟังก์ชันขณะกำลังลาก
+  const handleMove = (clientX, clientY) => {
+    if (!dragRef.current.isDragging) return;
+    setPosition({
+      x: clientX - dragRef.current.mouseOffset.x,
+      y: clientY - dragRef.current.mouseOffset.y
+    });
+  };
+
+  // ฟังก์ชันเมื่อปล่อยมือ/เมาส์
+  const handleEnd = (clientX, clientY) => {
+    if (!dragRef.current.isDragging) return;
+
+    const moved = Math.abs(clientX - dragRef.current.startPos.x) > 5 || 
+                  Math.abs(clientY - dragRef.current.startPos.y) > 5;
     
+    dragRef.current.isDragging = false;
+
+    // ถอด Event ออกเมื่อปล่อย
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('mouseup', handleMouseUp);
+    window.removeEventListener('touchmove', handleTouchMove);
+    window.removeEventListener('touchend', handleTouchend);
+
+    if (!moved) handleClick();
+  };
+
+  // --- Mouse Events ---
+  const handleMouseDown = (e) => {
+    handleStart(e.clientX, e.clientY);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
   };
 
-  const handleMouseMove = (e) => {
-    if (!dragRef.current.isDragging) return;
-    setPosition({
-      x: e.clientX - dragRef.current.mouseOffset.x,
-      y: e.clientY - dragRef.current.mouseOffset.y
-    });
+  const handleMouseMove = (e) => handleMove(e.clientX, e.clientY);
+  const handleMouseUp = (e) => handleEnd(e.clientX, e.clientY);
+
+  // --- Touch Events (สำหรับมือถือ) ---
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    handleStart(touch.clientX, touch.clientY);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchend);
   };
 
-  const handleMouseUp = (e) => {
-    const moved = Math.abs(e.clientX - dragRef.current.startPos.x) > 5 || 
-                  Math.abs(e.clientY - dragRef.current.startPos.y) > 5;
-    
-    dragRef.current.isDragging = false;
-    window.removeEventListener('mousemove', handleMouseMove);
-    window.removeEventListener('mouseup', handleMouseUp);
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0];
+    handleMove(touch.clientX, touch.clientY);
+  };
 
-    if (!moved) handleClick();
+  const handleTouchend = (e) => {
+    const touch = e.changedTouches[0];
+    handleEnd(touch.clientX, touch.clientY);
   };
 
   const handleClick = () => {
@@ -66,12 +100,16 @@ const FloatingGif = () => {
       className="floating-gif-container"
       style={{ 
         left: `${position.x}px`, 
-        top: `${position.y}px` 
+        top: `${position.y}px`,
+        position: 'fixed', // แนะนำให้ล็อกตำแหน่งแบบ fixed เสมอเวลาลอยบนจอ
+        zIndex: 9999,
+        touchAction: 'none' // ป้องกันไม่ให้จอมือถือสั่นหรือเลื่อนแปลกๆ เวลาใช้นิ้วลากมาสคอต
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
       title="ลากเพื่อย้ายที่ หรือคลิกเพื่อสุ่ม!"
     >
-      <img src={mascotData[currentIndex].gif} alt="Mascot" className="floating-gif-image" />
+      <img src={mascotData[currentIndex].gif} alt="Mascot" className="floating-gif-image" style={{ pointerEvents: 'none' }} />
     </div>
   );
 };
