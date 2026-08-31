@@ -11,33 +11,31 @@ const FloatingGif = () => {
   const [position, setPosition] = useState({ x: 20, y: 20 });
   
   const audioRef = useRef(null);
-  const dragRef = useRef({ isDragging: false, startPos: { x: 0, y: 0 }, mouseOffset: { x: 0, y: 0 } });
+  const dragRef = useRef({ isDragging: false, mouseOffset: { x: 0, y: 0 } });
+  
+  // ใช้ตัวแปรนี้เช็กชัวร์ๆ ว่ามีการขยับนิ้ว/เมาส์จริงๆ หรือเป็นการกดจิ้มธรรมดา
+  const hasMovedRef = useRef(false);
 
-  // ฟังก์ชันคำนวณตำแหน่งเริ่มต้น (รองรับทั้ง Mouse และ Touch)
   const handleStart = (clientX, clientY) => {
     dragRef.current.isDragging = true;
-    dragRef.current.startPos = { x: clientX, y: clientY };
+    hasMovedRef.current = false; // เริ่มต้นนับว่ายังไม่ได้ลาก
     dragRef.current.mouseOffset = {
       x: clientX - position.x,
       y: clientY - position.y
     };
   };
 
-  // ฟังก์ชันขณะกำลังลาก
   const handleMove = (clientX, clientY) => {
     if (!dragRef.current.isDragging) return;
+    hasMovedRef.current = true; // ถ้ามีการขยับเมาส์/นิ้ว แปลว่ากำลังลากแน่นอน
     setPosition({
       x: clientX - dragRef.current.mouseOffset.x,
       y: clientY - dragRef.current.mouseOffset.y
     });
   };
 
-  // ฟังก์ชันเมื่อปล่อยมือ/เมาส์
-  const handleEnd = (clientX, clientY) => {
+  const handleEnd = () => {
     if (!dragRef.current.isDragging) return;
-
-    const moved = Math.abs(clientX - dragRef.current.startPos.x) > 5 || 
-                  Math.abs(clientY - dragRef.current.startPos.y) > 5;
     
     dragRef.current.isDragging = false;
 
@@ -47,7 +45,10 @@ const FloatingGif = () => {
     window.removeEventListener('touchmove', handleTouchMove);
     window.removeEventListener('touchend', handleTouchend);
 
-    if (!moved) handleClick();
+    // ถ้าไม่ได้ขยับ (เป็นการกดจิ้มเฉยๆ) ให้สั่งสุ่มทำงาน!
+    if (!hasMovedRef.current) {
+      handleClick();
+    }
   };
 
   // --- Mouse Events ---
@@ -58,7 +59,7 @@ const FloatingGif = () => {
   };
 
   const handleMouseMove = (e) => handleMove(e.clientX, e.clientY);
-  const handleMouseUp = (e) => handleEnd(e.clientX, e.clientY);
+  const handleMouseUp = () => handleEnd();
 
   // --- Touch Events (สำหรับมือถือ) ---
   const handleTouchStart = (e) => {
@@ -73,10 +74,7 @@ const FloatingGif = () => {
     handleMove(touch.clientX, touch.clientY);
   };
 
-  const handleTouchend = (e) => {
-    const touch = e.changedTouches[0];
-    handleEnd(touch.clientX, touch.clientY);
-  };
+  const handleTouchend = () => handleEnd();
 
   const handleClick = () => {
     if (audioRef.current) {
@@ -101,9 +99,9 @@ const FloatingGif = () => {
       style={{ 
         left: `${position.x}px`, 
         top: `${position.y}px`,
-        position: 'fixed', // แนะนำให้ล็อกตำแหน่งแบบ fixed เสมอเวลาลอยบนจอ
+        position: 'fixed',
         zIndex: 9999,
-        touchAction: 'none' // ป้องกันไม่ให้จอมือถือสั่นหรือเลื่อนแปลกๆ เวลาใช้นิ้วลากมาสคอต
+        touchAction: 'none'
       }}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
