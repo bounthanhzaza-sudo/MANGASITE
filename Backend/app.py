@@ -424,3 +424,19 @@ def delete_manga(manga_id):
         """, (manga_id,))
         
         cursor.execute("DELETE FROM chapters WHERE manga_id = %s", (manga_id,))
+        cursor.execute("DELETE FROM mangas WHERE id = %s", (manga_id,))
+        
+        conn.commit()
+        return jsonify({"message": "Manga deleted successfully!"}), 200
+    except mysql.connector.Error as err:
+        conn.rollback()
+        print(f"Database Error in delete_manga: {err}")
+        return jsonify({"error": f"Database error: {err}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
