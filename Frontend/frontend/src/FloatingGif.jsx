@@ -13,7 +13,7 @@ const FloatingGif = () => {
   const dragRef = useRef({ isDragging: false, mouseOffset: { x: 0, y: 0 } });
   const hasMovedRef = useRef(false);
 
-  // Preload เสียงเตรียมไว้ล่วงหน้าทั้งสองไฟล์ ป้องกันมือถือโหลดไม่ทันแล้วค้าง/หาย
+  // Preload เสียงเตรียมไว้ล่วงหน้า
   const audioRefs = useRef([]);
   useEffect(() => {
     audioRefs.current = mascotData.map((item) => new Audio(item.sound));
@@ -85,18 +85,24 @@ const FloatingGif = () => {
     }
   };
 
-  // --- ฟังก์ชันสลับรูปและเล่นเสียงแบบปลอดภัย ---
+  // --- ฟังก์ชันจัดการคลิกแบบเคลียร์เสียงเก่าทิ้ง 100% ---
   const handleClick = () => {
-    // 1. สลับ Index แบบ Functional Update ป้องกันค่าซ้อนทับกัน
+    // 1. สั่งหยุดและรีเซ็ตเสียงทุกอันในระบบทันที ป้องกันเสียงซ้อนกัน
+    audioRefs.current.forEach((audio) => {
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    });
+
+    // 2. สลับรูปภาพ
     setCurrentIndex((prevIndex) => {
       const nextIndex = prevIndex === 0 ? 1 : 0;
       
-      // 2. เล่นเสียงที่เตรียมไว้ล่วงหน้า
-      const currentAudio = audioRefs.current[nextIndex];
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        currentAudio.play().catch((e) => console.log("Playback failed", e));
+      // 3. เล่นเฉพาะเสียงของตัวใหม่ที่ถูกสลับไป
+      const newAudio = audioRefs.current[nextIndex];
+      if (newAudio) {
+        newAudio.play().catch((e) => console.log("Playback failed", e));
       }
 
       return nextIndex;
