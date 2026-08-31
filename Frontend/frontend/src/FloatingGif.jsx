@@ -75,23 +75,21 @@ const FloatingGif = () => {
     window.removeEventListener('touchmove', handleTouchMove);
     window.removeEventListener('touchend', handleTouchEnd);
 
-    // ถ้าจิ้มบนมือถือแล้วไม่ได้ลาก ให้สุ่มทำงานทันที!
+    // ถ้าจิ้มบนมือถือแล้วไม่ได้ลาก ให้สั่งสลับรูปทำงานทันที!
     if (!hasMovedRef.current) {
       handleClick();
     }
   };
 
-  // --- ฟังก์ชันสุ่มรูปและเสียง ---
+  // --- ฟังก์ชันสลับรูปและเสียงแบบชัวร์ 100% (สลับไปมาระหว่าง 0 และ 1) ---
   const handleClick = () => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
     
-    let nextIndex;
-    do {
-      nextIndex = Math.floor(Math.random() * mascotData.length);
-    } while (nextIndex === currentIndex && mascotData.length > 1);
+    // สลับค่า index ทันที (0 เป็น 1, 1 เป็น 0)
+    const nextIndex = currentIndex === 0 ? 1 : 0;
     
     setCurrentIndex(nextIndex);
     const newAudio = new Audio(mascotData[nextIndex].sound);
