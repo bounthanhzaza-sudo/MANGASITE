@@ -40,12 +40,11 @@ def normalize_cover_url(cover_url):
     if cleaned.startswith(('http://', 'https://')):
         return cleaned
 
-    # ดึงค่าจาก BACKEND_URL (หรือ RENDER_EXTERNAL_URL / RAILWAY_STATIC_URL ถ้ามี)
+    # ดึงค่าจาก BACKEND_URL หรือถ้าอยู่บน Railway ให้ดึงจาก RENDER_EXTERNAL_URL / RAILWAY_STATIC_URL
     base_url = os.getenv("BACKEND_URL") or os.getenv("RAILWAY_STATIC_URL")
     
     if not base_url:
         host = request.host if request else "127.0.0.1:5000"
-        # ตรวจสอบว่าเป็น HTTPS หรือไม่ (Railway ใช้ https เสมอสำหรับ Public Domain)
         scheme = "https" if "railway.app" in host or (request and request.is_secure) else "http"
         base_url = f"{scheme}://{host}"
 
