@@ -13,70 +13,123 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
-# สร้างโฟลเดอร์ uploads หากยังไม่มี
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
 app = Flask(__name__)
+
+# เปิดใช้งาน CORS รองรับการเข้าถึง API ทุกโดเมน ป้องกันปัญหา CORS Policy
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# Configure the upload folder for the Flask app
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# เปิดใช้งาน CORS รองรับทุก Route เพื่อป้องกันปัญหาการโหลดภาพและเรียก API
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Ensure the upload folder exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+
+# --- Helper Functions ---
 def allowed_file(filename):
+    """Checks if the file's extension is in the allowed list."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+def normalize_cover_url(cover_url):
+    """Convert stored filenames into fully qualified URL paths for the frontend."""
+    if not cover_url:
+        return ""
+
+    cleaned = str(cover_url).strip().replace('<', '').replace('>', '')
+    if cleaned.startswith(('http://', 'https://')):
+        return cleaned
+
+    # ดึงค่าจาก BACKEND_URL หรือถ้าอยู่บน Railway ให้ดึงจาก RENDER_EXTERNAL_URL / RAILWAY_STATIC_URL
+    base_url = os.getenv("BACKEND_URL") or os.getenv("RAILWAY_STATIC_URL")
+    
+    if not base_url:
+        host = request.host if request else "127.0.0.1:5000"
+        scheme = "https" if "railway.app" in host or (request and request.is_secure) else "http"
+        base_url = f"{scheme}://{host}"
+
+    return f"{base_url.rstrip('/')}/uploads/{cleaned.lstrip('/')}"
+
+
 def get_db_connection():
+    """Establishes a connection to the MySQL database."""
     try:
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST", "localhost"),
             user=os.getenv("DB_USER", "root"),
+            port=int(os.getenv("DB_PORT", 3306)),
             password=os.getenv("DB_PASSWORD", ""),
-            database=os.getenv("DB_NAME", "manga_db"),
-            port=int(os.getenv("DB_PORT", 3306))
+            database=os.getenv("DB_NAME", "manga-website"),
+            autocommit=True
         )
         return conn
     except mysql.connector.Error as err:
-        print(f"Database connection error: {err}")
+        print(f"Error connecting to database: {err}")
         return None
 
-def normalize_cover_url(filename):
-    if not filename:
-        return ""
-    if filename.startswith("http://") or filename.startswith("https://"):
-        return filename
-    return f"/uploads/{filename}"
+
+# --- Root & API Endpoints ---
+@app.route('/', methods=['GET'])
+def home():
+    """Endpoint สำหรับตรวจสอบสถานะหน้าแรกของ Backend ไม่ให้เจอ 404"""
+    return jsonify({
+        "status": "online",
+        "message": "MangaSite Backend is running successfully!"
+    }), 200
 
 
-@app.route('/api/manga/<int:manga_id>', methods=['GET'])
-def get_manga_detail(manga_id):
-    """Endpoint สำหรับดึงข้อมูลมังงะรายเรื่องพร้อมรายการตอน"""
+@app.route('/api/manga', methods=['GET'])
+def get_mangas():
+    search_query = request.args.get('search', '').strip()
+    genre_query = request.args.get('genre', '').strip()
+
     conn = get_db_connection()
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
 
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT id, title, description, status, category, cover_image_url, genre FROM mangas WHERE id = %s", (manga_id,))
-        manga = cursor.fetchone()
+        sql = "SELECT id, title, description, status, category, cover_image_url, genre FROM mangas WHERE 1=1"
+        params = []
 
-        if not manga:
-            return jsonify({"error": "Manga not found"}), 404
+        if search_query:
+            sql += " AND title LIKE %s"
+            params.append(f"%{search_query}%")
 
-        manga['coverUrl'] = normalize_cover_url(manga.get('cover_image_url'))
-        manga.pop('cover_image_url', None)
+        if genre_query and genre_query != 'All':
+            sql += " AND genre = %s"
+            params.append(genre_query)
 
-        if not manga.get('genre'):
-            manga['genre'] = 'Action'
+        sql += " ORDER BY id DESC"
 
-        cursor.execute(
-            "SELECT id, chapter_number FROM chapters WHERE manga_id = %s ORDER BY id ASC",
-            (manga_id,)
-        )
-        raw_chapters = cursor.fetchall()
-        manga['chapters'] = [{"id": chap['id'], "title": chap['chapter_number']} for chap in raw_chapters]
+        cursor.execute(sql, tuple(params))
+        mangas = cursor.fetchall()
 
-        return jsonify(manga), 200
+        for manga in mangas:
+            manga['coverUrl'] = normalize_cover_url(manga.get('cover_image_url'))
+            manga.pop('cover_image_url', None)
+
+            if not manga.get('genre'):
+                manga['genre'] = 'Action'
+
+            chap_cursor = conn.cursor(dictionary=True)
+            chap_cursor.execute(
+                "SELECT id, chapter_number FROM chapters WHERE manga_id = %s ORDER BY id ASC",
+                (manga['id'],)
+            )
+            
+            raw_chapters = chap_cursor.fetchall()
+            chapters_formatted = []
+            for chap in raw_chapters:
+                chapters_formatted.append({
+                    "id": chap['id'],
+                    "title": chap['chapter_number']
+                })
+            
+            manga['chapters'] = chapters_formatted
+            chap_cursor.close()
+
+        return jsonify(mangas), 200
     except mysql.connector.Error as err:
         return jsonify({"error": f"Database error: {err}"}), 500
     finally:
@@ -102,7 +155,6 @@ def add_manga_with_image():
     if image_file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
-    save_path = ""
     if image_file and allowed_file(image_file.filename):
         original_filename = secure_filename(image_file.filename)
         extension = original_filename.rsplit('.', 1)[1].lower()
@@ -114,8 +166,6 @@ def add_manga_with_image():
 
     conn = get_db_connection()
     if not conn:
-        if os.path.exists(save_path):
-            os.remove(save_path)
         return jsonify({"error": "Database connection failed"}), 500
 
     cursor = conn.cursor()
@@ -125,7 +175,6 @@ def add_manga_with_image():
     """
     try:
         cursor.execute(sql, (title, unique_filename, category, status, description, genre))
-        conn.commit()
         manga_id = cursor.lastrowid
 
         return jsonify({
@@ -161,7 +210,6 @@ def add_chapter(manga_id):
         return jsonify({"error": "Database connection failed"}), 500
     
     cursor = conn.cursor()
-    saved_paths = []
     try:
         cursor.execute(
             """
@@ -188,7 +236,6 @@ def add_chapter(manga_id):
                 save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
                 
                 file.save(save_path)
-                saved_paths.append(save_path)
 
                 cursor.execute(
                     "INSERT INTO chapter_pages (chapter_id, image_url, page_order) VALUES (%s, %s, %s)",
@@ -199,9 +246,6 @@ def add_chapter(manga_id):
         return jsonify({"message": "Chapter and pages added successfully!", "chapter_id": chapter_id}), 201
     except mysql.connector.Error as err:
         conn.rollback()
-        for path in saved_paths:
-            if os.path.exists(path):
-                os.remove(path)
         print(f"Database Error in add_chapter: {err}")
         return jsonify({"error": str(err)}), 500
     finally:
