@@ -40,13 +40,18 @@ def normalize_cover_url(cover_url):
     if cleaned.startswith(('http://', 'https://')):
         return cleaned
 
-    # ดึงค่าจาก BACKEND_URL หรือถ้าอยู่บน Railway ให้ดึงจาก RAILWAY_STATIC_URL
-    base_url = os.getenv("BACKEND_URL") or os.getenv("RAILWAY_STATIC_URL")
+    # ตรวจสอบว่ากำลังรันอยู่บน Localhost หรือไม่
+    # ถ้า request มาจาก localhost หรือไม่มีค่า BACKEND_URL บังคับให้ใช้ Localhost เพื่อป้องกันรูป 404 ตอนเทสในเครื่อง
+    host = request.host if request else "127.0.0.1:5000"
     
-    if not base_url:
-        host = request.host if request else "127.0.0.1:5000"
-        scheme = "https" if "railway.app" in host or (request and request.is_secure) else "http"
-        base_url = f"{scheme}://{host}"
+    if "localhost" in host or "127.0.0.1" in host:
+        base_url = f"http://{host}"
+    else:
+        # ดึงค่าจาก BACKEND_URL หรือถ้าอยู่บน Railway ให้ดึงจาก RAILWAY_STATIC_URL
+        base_url = os.getenv("BACKEND_URL") or os.getenv("RAILWAY_STATIC_URL")
+        if not base_url:
+            scheme = "https" if "railway.app" in host or (request and request.is_secure) else "http"
+            base_url = f"{scheme}://{host}"
 
     return f"{base_url.rstrip('/')}/uploads/{cleaned.lstrip('/')}"
 
@@ -57,9 +62,9 @@ def get_db_connection():
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST", "localhost"),
             user=os.getenv("DB_USER", "root"),
-            port=int(os.getenv("DB_PORT", 3307)),  # ปรับพอร์ตมาตรฐานเป็น 3306 (หรือแก้ตามจริงใน .env)
+            port=int(os.getenv("DB_PORT", 3307)),  # ตั้งค่าพอร์ต MySQL เป็น 3307 ตามที่คุณใช้งาน
             password=os.getenv("DB_PASSWORD", ""),
-            database=os.getenv("DB_NAME", "manga-website"), # ปรับชื่อ DB ตามที่คุณใช้งาน
+            database=os.getenv("DB_NAME", "manga-website"),
             autocommit=True
         )
         return conn
@@ -130,6 +135,36 @@ def get_mangas():
             chap_cursor.close()
 
         return jsonify(mangas), 200
+    except mysql.connector.Error as err:
+        return jsonify({"error": f"Database error: {err}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.route('/api/manga/<int:manga_id>', methods=['GET'])
+def get_manga_detail(manga_id):
+    """เพิ่ม Endpoint สำหรับดึงข้อมูลมังงะรายเรื่อง ป้องกัน Error 404 ตอนกดเข้าไปดูดีเทล"""
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT id, title, description, status, category, cover_image_url, genre FROM mangas WHERE id = %s", (manga_id,))
+        manga = cursor.fetchone()
+
+        if not manga:
+            return jsonify({"error": "Manga not found"}), 404
+
+        manga['coverUrl'] = normalize_cover_url(manga.get('cover_image_url'))
+        manga.pop('cover_image_url', None)
+
+        cursor.execute("SELECT id, chapter_number FROM chapters WHERE manga_id = %s ORDER BY id ASC", (manga_id,))
+        chapters = cursor.fetchall()
+        manga['chapters'] = [{"id": chap['id'], "title": chap['chapter_number']} for chap in chapters]
+
+        return jsonify(manga), 200
     except mysql.connector.Error as err:
         return jsonify({"error": f"Database error: {err}"}), 500
     finally:
@@ -389,19 +424,3 @@ def delete_manga(manga_id):
         """, (manga_id,))
         
         cursor.execute("DELETE FROM chapters WHERE manga_id = %s", (manga_id,))
-        cursor.execute("DELETE FROM mangas WHERE id = %s", (manga_id,))
-        
-        conn.commit()
-        return jsonify({"message": "Manga deleted successfully!"}), 200
-    except mysql.connector.Error as err:
-        conn.rollback()
-        print(f"Database Error in delete_manga: {err}")
-        return jsonify({"error": f"Database error: {err}"}), 500
-    finally:
-        cursor.close()
-        conn.close()
-
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
