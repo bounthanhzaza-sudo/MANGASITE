@@ -62,3 +62,28 @@
 .manga-card:hover .manga-card-info {
   transform: translateY(0);
 } 
+/* ==========================================
+   MOBILE RESPONSIVE FOR MANGA CARD
+   ========================================== */
+@media (max-width: 768px) {
+  .manga-card {
+    width: 100% !important; /* ให้การ์ดขยายเต็มพื้นที่คอลัมน์บนมือถือ */
+    max-width: none;
+  }
+
+  .manga-card-image {
+    height: 220px !important; /* ลดความสูงรูปลงเล็กน้อยบนมือถือ เพื่อให้พอดีกับจอแนวตั้ง */
+  }
+
+  .manga-card-overlay {
+    height: 220px !important;
+  }
+
+  /* บนมือถือไม่มี Hover ให้แสดงข้อมูลชื่อมังงะค้างไว้เลย หรือปรับให้แตะแล้วดูง่าย */
+  .manga-card-info {
+    transform: translateY(0) !important; /* แสดงชื่อเรื่องตลอดเวลาบนมือถือ ไม่ต้องรอ Hover */
+    background-color: rgba(0, 0, 0, 0.6) !important; /* เพิ่มความมืดให้พื้นหลังตัวหนังสืออ่านง่ายขึ้นบนมือถือ */
+    padding: 8px;
+    font-size: 15px; /* ลดขนาดฟอนต์ลงเล็กน้อยไม่ให้เบียดเกินไป */
+  }
+}

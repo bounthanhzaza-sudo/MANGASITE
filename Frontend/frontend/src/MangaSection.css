@@ -43,3 +43,38 @@ html.dark .manga-section-title {
   scroll-snap-align: start; /* ล็อกตำแหน่งเวลาเลื่อน */
   transition: transform 0.3s ease, filter 0.3s ease;
 }
+/* ==========================================
+   MOBILE & TABLET RESPONSIVE FOR MANGA SECTION
+   ========================================== */
+
+/* สำหรับหน้าจอแท็บเล็ต (แสดง 3-4 คอลัมน์) */
+@media (max-width: 1024px) {
+  .manga-scroll-wrapper {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px;
+  }
+}
+
+/* สำหรับหน้าจอมือถือ (แสดง 2 คอลัมน์ เพื่อความสวยงามและไม่เล็กจนเกินไป) */
+@media (max-width: 768px) {
+  .manga-section-container {
+    padding: 0.75rem 0.5rem; /* ลด Padding ด้านข้างลงเล็กน้อยให้ใช้พื้นที่คุ้มค่าขึ้น */
+  }
+
+  .manga-section-title {
+    font-size: 1.25rem !important; /* ลดขนาดหัวข้อลงนิดหน่อย */
+    margin-bottom: 10px;
+  }
+
+  .manga-scroll-wrapper {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* มือถือบังคับแสดง 2 คอลัมน์ */
+    gap: 10px !important;
+    width: 100% !important;
+    overflow-x: visible !important;
+  }
+
+  .manga-card-item {
+    width: 100% !important; /* ให้ขยายเต็มช่องคอลัมน์ */
+  }
+}

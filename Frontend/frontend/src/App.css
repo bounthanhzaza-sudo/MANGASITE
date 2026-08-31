@@ -216,3 +216,68 @@ html.dark .manga-section-title {
   color: #ffffff !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); /* เพิ่มเงาดำใต้ตัวหนังสือให้อ่านง่ายขึ้น */
 }
+/* ==========================================
+   MOBILE RESPONSIVE OPTIMIZATIONS (<= 768px)
+   ========================================== */
+@media (max-width: 768px) {
+  /* 1. ป้องกันหน้าจอมือถือเลื่อนซ้ายขวา */
+  body, html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* 2. ปรับหน้าแรกและส่วนแสดงผลมังงะให้เรียงสวยบนมือถือ */
+  .manga-grid, 
+  #manga-container,
+  .manga-list-container {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* บังคับแสดงผล 2 คอลัมน์บนมือถือ */
+    gap: 12px !important;
+    padding: 10px !important;
+  }
+
+  /* 3. ปรับขนาดการ์ดมังงะให้พอดีกับจอ 2 คอลัมน์ */
+  .manga-card {
+    width: 100% !important;
+    margin-bottom: 8px;
+    
+    img {
+      height: 200px !important; /* ล็อกความสูงรูปปกมังงะไม่ให้ยาวเกินไป */
+      object-fit: cover;
+    }
+  }
+
+  /* 4. ปรับหน้าอ่านมังงะ (Reader View) ให้รูปเต็มจอพอดีตา */
+  .read-container, 
+  .chapter-images {
+    width: 100% !important;
+    padding: 0 !important;
+    
+    img {
+      width: 100% !important;
+      height: auto !important;
+      display: block;
+      margin: 0 auto;
+    }
+  }
+
+  /* 5. ปรับขนาดหัวข้อเรื่องให้ไม่ใหญ่เกินขอบจอมือถือ */
+  h1 {
+    font-size: 24px !important;
+  }
+  
+  h2 {
+    font-size: 20px !important;
+  }
+
+  /* 6. ปรับแถบเมนู (Navbar) ให้ยืดหยุ่นบนจอแคบ */
+  .navbar, header {
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px !important;
+    
+    input[type="text"] {
+      width: 100% !important; /* ช่องค้นหาขยายเต็มจอในมือถือ */
+    }
+  }
+}
